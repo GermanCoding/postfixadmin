@@ -42,6 +42,8 @@ if (authentication_has_role('global-admin')) {
     $domains = list_domains_for_admin($SESSID_USERNAME);
 }
 
+$smarty = PFASmarty::getInstance();
+
 function get_status_color($row) {
     $status = "";
     if (($row['dkimresult'] == "fail") && ($row['spfresult'] == "fail")) {
