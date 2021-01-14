@@ -26,16 +26,27 @@ class Login {
         $values = array('username' => $username, 'active' => $active);
 
         $result = db_query_all($query, $values);
-        if (sizeof($result) == 1) {
+        if (sizeof($result) == 1 && strlen($password) > 0) {
             $row = $result[0];
 
-            $crypt_password = pacrypt($password, $row['password']);
-
+            try {
+                $crypt_password = pacrypt($password, $row['password']);
+            } catch (\Exception $e) {
+                error_log("Error while trying to call pacrypt()");
+                error_log($e);
+                hash_equals("not", "comparable");
+                return false; // just refuse to login?
+            }
             return hash_equals($row['password'], $crypt_password);
         }
 
         // try and be near constant time regardless of whether the db user exists or not
-        $x = pacrypt('abc', 'def');
+        try {
+            $x = pacrypt('abc', 'def');
+        } catch (\Exception $e) {
+            error_log("Error trying to call pacrypt()");
+            error_log($e);
+        }
 
         return hash_equals('not', 'comparable');
     }
