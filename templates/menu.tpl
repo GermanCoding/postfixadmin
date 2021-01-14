@@ -120,7 +120,7 @@
                                href="{#url_viewlog#}">{$PALANG.pMenu_viewlog}</a></li>
                     {/if}
                     {* DMARC *}
-                        <li><a target="_top" href="{#url_dmarc#}">DMARC</a></li>
+                        <li><a class="btn btn-default navbar-btn btn-sm" type="button" href="{#url_dmarc#}">DMARC</a></li>
                     {* logout *}
                     <li><a class="btn btn-default navbar-btn btn-sm" type="button"
                            href="{#url_logout#}">{$PALANG.pMenu_logout}</a></li>
