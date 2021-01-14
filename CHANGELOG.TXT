@@ -4,9 +4,22 @@
 # This source file is subject to the GPL license that is bundled with
 # this package in the file LICENSE.TXT.
 #
-# Further details on the project are available at http://postfixadmin.sf.net
+# Further details on the project are available at https://github.com/postfixadmin/postfixadmin
 
-Version 3.3 - 2020/01/09
+Version 3.3.2 - 2021/01/12
+-------------------------------------------------
+   - Add in the ability to specify a hash prefix with php_crypt password format, useful for Dovecot replacement. ( https://github.com/postfixadmin/postfixadmin/issues/344 )
+   - Add documentation (DOCUMENTS/HASHING.md)
+   - Fix issue with vacation form not saving; vacation start/end is now stored with time. ( https://github.com/postfixadmin/postfixadmin/issues/416 )
+
+Version 3.3.1 - 2021/01/11
+-------------------------------------------------
+
+   - Fix issue with cli not working ( see https://github.com/postfixadmin/postfixadmin/issues/415 )
+   - Fix issue with theme not working (if $CONF['theme_css'] was defined in config). ( see https://github.com/postfixadmin/postfixadmin/issues/410 )
+   - Fix links in footer ( see https://github.com/postfixadmin/postfixadmin/issues/412 )
+
+Version 3.3 - 2021/01/09
 -------------------------------------------------
    - Change setup.php to use PHP's password_hash() for the config setup_password . (breaking change, existing setup passwords will fail to work and need regenerating) 
    - Change setup.php to not reveal system paths etc until a setup_password is configured and provided (see: https://github.com/postfixadmin/postfixadmin/issues/402 )
@@ -27,6 +40,7 @@ Version 3.3 - 2020/01/09
    - MySQL 8 compatibility (see https://github.com/postfixadmin/postfixadmin/pull/175 )
    - Internally the database functions have been refactored to use PDO rather than the lower level mysql_, mysqli_, pg_ etc functions. ( see: https://github.com/postfixadmin/postfixadmin/pull/231 )
    - Usage of dovecot deliver as fetchmail mda
+   - Corrupted Turkish language file fixed and missing translations are added.
 
 Version 3.2 - 2018/05/02
 -------------------------------------------------

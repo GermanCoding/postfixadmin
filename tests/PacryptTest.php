@@ -83,8 +83,6 @@ class PaCryptTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testPhpCrypt() {
-        global $CONF;
-
         $config = Config::getInstance();
         Config::write('encrypt', 'php_crypt:MD5');
 
@@ -98,9 +96,39 @@ class PaCryptTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($enc, $expected);
 
         $fail = _pacrypt_php_crypt('bar', $expected);
+    }
 
+    public function testPhpCryptHandlesPrefixAndOrRounds() {
+        // try with 1000 rounds
+        Config::write('encrypt', 'php_crypt:SHA256:1000');
+        $password = 'hello';
 
-        $this->assertNotEquals($fail, $expected);
+        $randomHash = '$5$VhqhhsXJtPFeBX9e$kz3/CMIEu80bKdtDAcISIrDfdwtc.ilR68Vb3hNhu/7';
+        $randomHashWithPrefix = '{SHA256-CRYPT}' . $randomHash;
+
+        $new = _pacrypt_php_crypt($password, '');
+
+        $this->assertNotEquals($randomHash, $new); // salts should be different.
+
+        $enc = _pacrypt_php_crypt($password, $randomHash);
+        $this->assertEquals($enc, $randomHash);
+
+        $this->assertEquals($randomHash, _pacrypt_php_crypt("hello", $randomHash));
+        $this->assertEquals($randomHash, _pacrypt_crypt("hello", $randomHash));
+
+        Config::write('encrypt', 'php_crypt:SHA256::{SHA256-CRYPT}');
+
+        $enc = _pacrypt_php_crypt("hello", $randomHash);
+        $this->assertEquals($randomHash, $enc); // we passed in something lacking the prefix, so we shouldn't have added it in.
+        $this->assertTrue(hash_equals($randomHash, $enc));
+
+        // should cope with this :
+        $enc = _pacrypt_php_crypt($password, '');
+
+        $this->assertEquals($enc, _pacrypt_php_crypt($password, $enc));
+
+        $this->assertRegExp('/^\{SHA256-CRYPT\}/', $enc);
+        $this->assertGreaterThan(20, strlen($enc));
     }
 
     public function testPhpCryptRandomString() {
@@ -114,7 +142,7 @@ class PaCryptTest extends \PHPUnit\Framework\TestCase {
 
         // it should be difficult for us to get three salts of the same value back...
         // not impossible though.
-        $this->assertFalse( strcmp($str1, $str2) == 0 && strcmp($str1, $str3) == 0 );
+        $this->assertFalse(strcmp($str1, $str2) == 0 && strcmp($str1, $str3) == 0);
     }
 
     public function testSha512B64() {
@@ -138,6 +166,6 @@ class PaCryptTest extends \PHPUnit\Framework\TestCase {
 
         $this->assertFalse(hash_equals('test', $str3));
 
-        $this->assertTrue(hash_equals(_pacrypt_sha512_b64('foo',$str3), $str3));
+        $this->assertTrue(hash_equals(_pacrypt_sha512_b64('foo', $str3), $str3));
     }
 }

@@ -184,7 +184,7 @@ $CONF['smtp_sendmail_tls'] = 'NO';
 // mysql_encrypt = useful for PAM integration
 // authlib = support for courier-authlib style passwords - also set $CONF['authlib_default_flavor']
 // dovecot:CRYPT-METHOD = use dovecotpw -s 'CRYPT-METHOD'. Example: dovecot:CRAM-MD5
-// php_crypt:CRYPT-METHOD:DIFFICULTY = use PHP built in crypt()-function. Example: php_crypt:SHA512:50000
+// php_crypt:CRYPT-METHOD:DIFFICULTY:PREFIX = use PHP built in crypt()-function. Example: php_crypt:SHA512:50000
 // - php_crypt CRYPT-METHOD: Supported values are DES, MD5, BLOWFISH, SHA256, SHA512
 // - php_crypt DIFFICULTY: Larger value is more secure, but uses more CPU and time for each login.
 // - php_crypt DIFFICULTY: Set this according to your CPU processing power.
@@ -194,6 +194,7 @@ $CONF['smtp_sendmail_tls'] = 'NO';
 //     - don't use dovecot:* methods that include the username in the hash - you won't be able to login to PostfixAdmin in this case
 //     - you'll need at least dovecot 2.1 for salted passwords ('doveadm pw' 2.0.x doesn't support the '-t' option)
 //     - dovecot 2.0.0 - 2.0.7 is not supported
+// - php_crypt PREFIX: hash has specified prefix - example: php_crypt:SHA512::{SHA256-CRYPT}
 // sha512.b64 - {SHA512-CRYPT.B64} (base64 encoded sha512) (no dovecot dependency; should support migration from md5crypt)
 $CONF['encrypt'] = 'md5crypt';
 
@@ -705,7 +706,7 @@ $CONF['xmlrpc_enabled'] = false;
 //More details in README.password_expiration
 $CONF['password_expiration'] = 'YES';
 
-$CONF['version'] = '3.3';
+$CONF['version'] = '3.3.2';
 
 // If you want to keep most settings at default values and/or want to ensure
 // that future updates work without problems, you can use a separate config 

@@ -23,8 +23,12 @@ $errors = [];
 
 $configSetupDone = false;
 $authenticated = false;
+$old_setup_password = false;
 
-if ($configSetupPassword != 'changeme' && $configSetupPassword != '') {
+
+if (strpos($configSetupPassword, ':') > 0) {
+    $old_setup_password = true;
+} elseif ($configSetupPassword != 'changeme' && $configSetupPassword != '') {
     $configSetupDone = true;
 
     $pass = safepost('setup_password', 'invalid');
@@ -112,7 +116,7 @@ if ($configSetupDone) {
                 <li>Create / update your database of choice</li>
                 <li>and Add a new super user account</li>
             </ul>
-            
+
         </div>
 
     </div>
@@ -164,9 +168,11 @@ if ($configSetupDone) {
                     <p>You can use the form below, or run something like the following in a shell - <code>php -r 'echo password_hash("password", PASSWORD_DEFAULT);'</code><p>
 EOF;
         }
-        ?>
 
-        <?php
+        if ($old_setup_password) {
+            echo '<p class="text-danger"><strong>Your setup_password is in an obsolete. As of PostfixAdmin 3.3 it needs regenerating. </strong>';
+        }
+
         if (!$authenticated || !$configSetupDone) { ?>
 
         <h2>Generate setup_password hash</h2>
@@ -322,7 +328,8 @@ EOF;
                 <div class="form-group">
                     <label for="setup_password" class="col-sm-4 control-label">Setup password</label>
                     <div class="col-sm-4">
-                        <input class="form-control" type="text" required="required" name="setup_password" minlength=5
+                        <input class="form-control" type="password" required="required" name="setup_password"
+                               minlength=5
                                value=""/>
 
                     </div>
@@ -378,7 +385,7 @@ EOF;
             </form>
         </div>
 
-    <?php
+        <?php
     }
 
     if (safepost("form") === "createadmin" && $authenticated) {
@@ -435,6 +442,7 @@ function _error_field($errors, $key) {
     }
     return "<span style='color: #ff0000'>{$errors[$key]}</span>";
 }
+
 
 function create_admin($values) {
     define('POSTFIXADMIN_SETUP', 1); # avoids instant redirect to login.php after creating the admin
@@ -501,16 +509,13 @@ function do_software_environment_check() {
     $phpversion = 'unknown-version';
 
     if ($f_phpversion == 1) {
-        if (version_compare(phpversion(), '5', '<')) {
-            $error[] = "Error: Depends on: PHP v5+";
-        } elseif (version_compare(phpversion(), '7.0') < 0) {
-            $phpversion = 5;
-            $info[] = "Recommended PHP version: >= 7.0, you have " . phpversion() . "; you should upgrade.";
+        if (version_compare(PHP_VERSION, '7.0.0', '<')) {
+            $error[] = "Error: Depends on: PHP v7.0+. You must upgrade.";
         } else {
             $info[] = "PHP version " . phpversion();
         }
     } else {
-        $error[] = "Unable to check for PHP version. (missing function: phpversion())";
+        $error[] = "Unable to check for PHP version. (PHP_VERSION not found?)";
     }
 
 //
@@ -572,7 +577,7 @@ function do_software_environment_check() {
 
 
     if (!empty($link) && $error_text == "") {
-        $info[] = "Testing database connection (using {$CONF['database_type']}) - Success";
+        $info[] = "Testing database connection (using config) - Success";
     } else {
         $error[] = "Error: Can't connect to database - please check the \$CONF['database_*'] parameters in config.local.php : $error_text";
     }
@@ -612,17 +617,6 @@ function do_software_environment_check() {
         $info[] = "IMAP functions - Found";
     } else {
         $warn[] = "Warning: Optional dependency 'imap' extension missing, without this you may not be able to automcate creation of subfolders for new mailboxes";
-    }
-
-//
-    // If PHP <7.0, require random_compat works. Currently we bundle it via the Phar extension.
-//
-    if (version_compare(phpversion(), "7.0", '<')
-        && !extension_loaded('Phar')
-        && $CONF['configured']
-        && $CONF['encrypt'] == 'php_crypt') {
-        $error[] = "PHP before 7.0 requires 'Phar' extension support for <strong>secure</strong> random_int() function fallback. Either enable the 'Phar' extension, or install the random_compat library files from <a href='https://github.com/paragonie/random_compat'>https://github.com/paragonie/random_compat</a> and include/require them from functions.inc.php";
-        $error[] = "PostfixAdmin has bundled lib/random_compat.phar but it's not usable on your installation due to the missing Phar extension.";
     }
 
 
