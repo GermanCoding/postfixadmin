@@ -325,7 +325,9 @@ function maildir_name_hook($domain, $user) {
 
     Note: Adding a field to $struct adds the handling of this field in
     PostfixAdmin, but it does not create it in the database. You have to do
-    that yourself. 
+    that yourself.
+    Note: If you add fields here and you want them to be displayed in the
+    virtual lists, you must also modify the corresponding virtual-list template.
     Please follow the naming policy for custom database fields and tables on
     https://sourceforge.net/p/postfixadmin/wiki/Custom_fields/
     to avoid clashes with future versions of PostfixAdmin.
@@ -593,6 +595,16 @@ $CONF['mailbox_postedit_script'] = '';
 // Parameters: (1) username (2) domain
 // $CONF['mailbox_postdeletion_script']='sudo -u courier /usr/local/bin/postfixadmin-mailbox-postdeletion.sh';
 $CONF['mailbox_postdeletion_script'] = '';
+
+// Optional:
+// Script to run after setting a mailbox password. (New mailbox [$4 = empty] or change existing password)
+// Disables changing password without entering old password.
+// Note that this may fail if PHP is run in "safe mode", or if
+// operating system features (such as SELinux) or limitations
+// prevent the web-server from executing external scripts.
+// Parameters: (1) username (2) domain (3) old password (4) new password
+// $CONF['mailbox_postpassword_script']='/usr/local/bin/postfixadmin-mailbox-postpassword.sh';
+$CONF['mailbox_postpassword_script'] = '';
 
 // Optional:
 // Script to run after creation of domains.
