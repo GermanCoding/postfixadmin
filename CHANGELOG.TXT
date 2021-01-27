@@ -6,6 +6,31 @@
 #
 # Further details on the project are available at https://github.com/postfixadmin/postfixadmin
 
+MASTER
+------
+
+   - Add optional Dovecot mail-crypt plugin support - see https://github.com/postfixadmin/postfixadmin/issues/408
+
+Version 3.3.5 - 2021/01/27
+-------------------------------------------------
+   - Fix include path for password-change.php and improve UI for password-recover / password-change (nav bar was missing, remove table layout, fix labels not visible) (see https://github.com/postfixadmin/postfixadmin/issues/430
+   - Fix users/edit-alias to remove unnecessary space (see https://github.com/postfixadmin/postfixadmin/issues/442)
+   - Improve documentation
+   - Improve password length check example in config.inc.php (see //github.com/postfixadmin/postfixadmin/issues/423)
+   - Improve ADDITIONS/update_quota.pl (update to use quota2 table)
+   - Check for some config setting, and do not error if they are not set (see https://github.com/postfixadmin/postfixadmin/issues/437)
+   - Add pt-pt (portugese) translation (thanks Numo Carrilho/Nunix)
+   - Fix missing template variable 'domain_selected'
+
+
+Version 3.3.4 - 2021/01/19
+-------------------------------------------------
+   - Fix forgot-password (theme + trying to use class before autoload registered) (see //github.com/postfixadmin/postfixadmin/issues/427)
+   - Fix PHP 8.0 issues (string{} offset in CLI, psalm warning about string + int in MailboxHandler)
+   - Add PHP 8.0 to travis build + hopefully fix build
+   - Fix editform to add linefeeds on for e.g. alias editing (see https://github.com/postfixadmin/postfixadmin/pull/424)
+   - Fix mysql_crypt password hash - not all MySQL variants have RANDOM_BYTES function, so use our PHP based salt instead. (see https://github.com/postfixadmin/postfixadmin/issues/422)
+
 Version 3.3.3 - 2021/01/14
 -------------------------------------------------
    - Improve error handling around login (require non-empty password; cope with pacrypt() throwing an exception; see https://github.com/postfixadmin/postfixadmin/issues/420)
@@ -26,6 +51,7 @@ Version 3.3.1 - 2021/01/11
 
 Version 3.3 - 2021/01/09
 -------------------------------------------------
+   - PostfixAdmin requires PHP 7.0 or greater.
    - Change setup.php to use PHP's password_hash() for the config setup_password . (breaking change, existing setup passwords will fail to work and need regenerating) 
    - Change setup.php to not reveal system paths etc until a setup_password is configured and provided (see: https://github.com/postfixadmin/postfixadmin/issues/402 )
    - Move to bootstrap theme ( see https://github.com/postfixadmin/postfixadmin/pull/172 )

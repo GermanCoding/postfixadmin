@@ -230,14 +230,8 @@ $CONF['password_validation'] = array(
     '/([a-zA-Z].*){3}/'     => 'password_no_characters 3',  # must contain at least 3 characters
     '/([0-9].*){2}/'        => 'password_no_digits 2',      # must contain at least 2 digits
 
-    /*  support a 'callable' value which if it returns a non-empty string will be assumed to have failed. */
-
-    /**
-     * 'any-key' =>  function($password) { 
-     *                   if ( rand(0, 5) == 0 ) { return 'password_too_short'; } 
-     *                   // add some remote api check here ... or whatever 
-     *               },
-     */
+    /*  support a 'callable' value which if it returns a non-empty string will be assumed to have failed, non-empty string should be a PALANG key */
+    // 'length_check'          => function($password) { if (strlen(trim($password)) < 3) { return 'password_too_short'; } },
 );
 
 // Generate Password
@@ -569,57 +563,59 @@ $CONF['show_custom_colors']=array("lightgreen","lightblue");
 // Set to "" to disable this check.
 $CONF['recipient_delimiter'] = "";
 
-// Optional:
+/**
+ * NOTE FOR OPTIONAL SCRIPTS BELOW.
+ *
+ * These scripts will probably be called by your webserver user (typically 'www-data').
+ *
+ * Execution may fail for a number of reasons, perhaps :
+ *  * PHP is running in 'safe mode' 
+ *  * you have operating system features like SELinux or Apparmor
+ *  * Unix file ownership/permission restrictions
+ *
+ * Your mail system probably requires different ownership (e.g. courier, dovecot, mail ...)
+ *
+ * You will probably need to use 'sudo' either within the script, or when calling it, to resolve issues of ownership/permission.
+ *
+ * Details about errors from execution should be logged into PHP's error_log. 
+ *
+ * See also: https://github.com/postfixadmin/postfixadmin/blob/master/DOCUMENTS/FAQ.txt
+ *
+ */
+
+// Optional: See NOTE above.
 // Script to run after creation of mailboxes.
-// Note that this may fail if PHP is run in "safe mode", or if
-// operating system features (such as SELinux) or limitations
-// prevent the web-server from executing external scripts.
 // Parameters: (1) username (2) domain (3) maildir (4) quota
 // $CONF['mailbox_postcreation_script']='sudo -u courier /usr/local/bin/postfixadmin-mailbox-postcreation.sh';
 $CONF['mailbox_postcreation_script'] = '';
 
-// Optional:
+// Optional: See NOTE above.
 // Script to run after alteration of mailboxes.
-// Note that this may fail if PHP is run in "safe mode", or if
-// operating system features (such as SELinux) or limitations
-// prevent the web-server from executing external scripts.
 // Parameters: (1) username (2) domain (3) maildir (4) quota
 // $CONF['mailbox_postedit_script']='sudo -u courier /usr/local/bin/postfixadmin-mailbox-postedit.sh';
 $CONF['mailbox_postedit_script'] = '';
 
-// Optional:
+// Optional: See NOTE above.
 // Script to run after deletion of mailboxes.
-// Note that this may fail if PHP is run in "safe mode", or if
-// operating system features (such as SELinux) or limitations
-// prevent the web-server from executing external scripts.
 // Parameters: (1) username (2) domain
 // $CONF['mailbox_postdeletion_script']='sudo -u courier /usr/local/bin/postfixadmin-mailbox-postdeletion.sh';
 $CONF['mailbox_postdeletion_script'] = '';
 
-// Optional:
+// Optional: See NOTE above.
 // Script to run after setting a mailbox password. (New mailbox [$4 = empty] or change existing password)
 // Disables changing password without entering old password.
-// Note that this may fail if PHP is run in "safe mode", or if
-// operating system features (such as SELinux) or limitations
-// prevent the web-server from executing external scripts.
 // Parameters: (1) username (2) domain (3) old password (4) new password
-// $CONF['mailbox_postpassword_script']='/usr/local/bin/postfixadmin-mailbox-postpassword.sh';
+// $CONF['mailbox_postpassword_script']='sudo -u dovecot /usr/local/bin/postfixadmin-mailbox-postpassword.sh';
 $CONF['mailbox_postpassword_script'] = '';
 
-// Optional:
+// Optional: See NOTE above.
 // Script to run after creation of domains.
-// Note that this may fail if PHP is run in "safe mode", or if
-// operating system features (such as SELinux) or limitations
-// prevent the web-server from executing external scripts.
 // Parameters: (1) domain
 //$CONF['domain_postcreation_script']='sudo -u courier /usr/local/bin/postfixadmin-domain-postcreation.sh';
 $CONF['domain_postcreation_script'] = '';
 
-// Optional:
+// Optional: See NOTE above.
 // Script to run after deletion of domains.
-// Note that this may fail if PHP is run in "safe mode", or if
-// operating system features (such as SELinux) or limitations
-// prevent the web-server from executing external scripts.
 // Parameters: (1) domain
 // $CONF['domain_postdeletion_script']='sudo -u courier /usr/local/bin/postfixadmin-domain-postdeletion.sh';
 $CONF['domain_postdeletion_script'] = '';
@@ -718,7 +714,7 @@ $CONF['xmlrpc_enabled'] = false;
 //More details in README.password_expiration
 $CONF['password_expiration'] = 'YES';
 
-$CONF['version'] = '3.3.3';
+$CONF['version'] = '3.3.5';
 
 // If you want to keep most settings at default values and/or want to ensure
 // that future updates work without problems, you can use a separate config 

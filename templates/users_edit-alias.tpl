@@ -11,11 +11,8 @@
             <div class="form-group">
                 <label class="col-md-4 col-sm-4 control-label" for="fGoto">{$PALANG.to}:</label>
                 <div class="col-md-6 col-sm-8">
-			<textarea class="form-control" rows="4" cols="50" name="fGoto" id="fGoto">
-{foreach from=$tGotoArray item=address}
-    {$address}
-{/foreach}
-			</textarea>
+                    <textarea class="form-control" rows="8" cols="50" name="fGoto"
+                              id="fGoto">{foreach key=key2 item=field2 from=$tGotoArray}{$field2}&#10;{/foreach}</textarea>
                 </div>
             </div>
             <div class="form-group">
@@ -39,12 +36,15 @@
             </div>
         </div>
         <div class="panel-footer">
-            <div class="btn-toolbar" role="toolbar">
-                <div class="btn-group pull-right">
-                    <input class="btn btn-primary" type="submit" name="submit" value="{$PALANG.save}"/>
-                    <input class="btn btn-primary" type="submit" name="fCancel" value="{$PALANG.exit}"/>
+
+            <div class="btn-toolbar">
+                <div class="pull-right">
+                    <a href="main.php" class="mr btn btn-secondary">{$PALANG.exit}</a>
+
+                    <button class="ml btn btn-lg btn-primary" type="submit" name="submit" value="{$PALANG.save}">{$PALANG.save}</button>
                 </div>
             </div>
+
         </div>
     </div>
 </form>

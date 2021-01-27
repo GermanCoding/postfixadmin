@@ -899,9 +899,11 @@ function validate_password($password) {
     $result = array();
     $val_conf = Config::read_array('password_validation');
 
-    $minlen = (int) Config::read_string('min_password_length'); # used up to 2.3.x - check it for backward compatibility
-    if ($minlen > 0) {
-        $val_conf['/.{' . $minlen . '}/'] = "password_too_short $minlen";
+    if (Config::has('min_password_length')) {
+        $minlen = (int)Config::read_string('min_password_length'); # used up to 2.3.x - check it for backward compatibility
+        if ($minlen > 0) {
+            $val_conf['/.{' . $minlen . '}/'] = "password_too_short $minlen";
+        }
     }
 
     foreach ($val_conf as $regex => $message) {
@@ -1615,7 +1617,11 @@ function db_connect() {
     $dsn = null;
 
     if (db_mysql()) {
-        $socket = Config::read_string('database_socket');
+        $socket = false;
+        if (Config::has('database_socket')) {
+            $socket = Config::read_string('database_socket');
+        }
+
         $database_name = Config::read_string('database_name');
 
         if ($socket) {
@@ -2113,8 +2119,6 @@ function table_by_key($table_key) {
     $table = $CONF['database_prefix'] . $table;
 
     if (db_mysql()) {
-        // try and ensure we don't get ``table`` ?
-        $table = preg_replace('/`/', '', $table);
         return "`" . $table . "`";
     }
 
@@ -2231,7 +2235,7 @@ function gen_show_status($show_alias) {
     }
 
     // Vacation CHECK
-    if ( $CONF['show_vacation'] == 'YES' ) {
+    if ( array_key_exists('show_vacation', $CONF) && $CONF['show_vacation'] == 'YES' ) {
         $stat_result = db_query_one("SELECT * FROM ". table_by_key('vacation') ." WHERE email = ? AND active = ? ", array($show_alias, db_get_boolean(true) )) ;
         if (!empty($stat_result)) {
             $stat_string .= "<span style='background-color:" . $CONF['show_vacation_color'] . "'>" . $CONF['show_status_text'] . "</span>&nbsp;";
@@ -2241,7 +2245,7 @@ function gen_show_status($show_alias) {
     }
 
     // Disabled CHECK
-    if ( $CONF['show_disabled'] == 'YES' ) {
+    if ( array_key_exists('show_disabled', $CONF) &&  $CONF['show_disabled'] == 'YES' ) {
         $stat_result = db_query_one(
             "SELECT * FROM ". table_by_key('mailbox') ." WHERE username = ? AND active = ?",
             array($show_alias, db_get_boolean(false))
@@ -2254,13 +2258,13 @@ function gen_show_status($show_alias) {
     }
 
     // Expired CHECK
-    if ( Config::bool('password_expiration') && Config::bool('show_expired') ) {
+    if (Config::has('password_expiration') && Config::bool('password_expiration') && Config::bool('show_expired')) {
         $now = 'now()';
         if (db_sqlite()) {
             $now = "datetime('now')";
         }
 
-        $stat_result = db_query_one("SELECT * FROM ". table_by_key('mailbox') ." WHERE username = ? AND password_expiry <= $now AND active = ?", array( $show_alias , db_get_boolean(true) ));
+        $stat_result = db_query_one("SELECT * FROM " . table_by_key('mailbox') . " WHERE username = ? AND password_expiry <= $now AND active = ?", array($show_alias, db_get_boolean(true)));
 
         if (!empty($stat_result)) {
             $stat_string .= "<span style='background-color:" . $CONF['show_expired_color'] . "'>" . $CONF['show_status_text'] . "</span>&nbsp;";
