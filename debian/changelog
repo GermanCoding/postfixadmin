@@ -1,6 +1,6 @@
-postfixadmin (3.3.3-1) unstable; urgency=low
+postfixadmin (3.3.8-1) unstable; urgency=low
 
-  * New upstream release - PostfixAdmin v3.3.3
+  * New upstream release - PostfixAdmin v3.3.8
 
  -- Max <max@null.null>  Sat, 09 Jan 2021 17:09:01 +0200
 

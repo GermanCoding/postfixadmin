@@ -665,7 +665,7 @@ function check_owner($username, $domain) {
 
 /**
  * List domains for an admin user.
- * @param String $username
+ * @param string $username
  * @return array of domain names.
  */
 function list_domains_for_admin($username) {
@@ -914,7 +914,7 @@ function validate_password($password) {
             }
             continue;
         }
-       
+
         if (!preg_match($regex, $password)) {
             $msgparts = preg_split("/ /", $message, 2);
             if (count($msgparts) == 1) {
@@ -1456,19 +1456,20 @@ function to64($v, $n) {
  * Action: Send email
  * Call: smtp_mail (string to, string from, string subject, string body]) - or -
  * Call: smtp_mail (string to, string from, string data) - DEPRECATED
- * @param String - To:
- * @param String - From:
- * @param String - Subject: (if called with 4 parameters) or full mail body (if called with 3 parameters)
- * @param String (optional) - Password
- * @param String (optional, but recommended) - mail body
+ * @param string $to
+ * @param string $from
+ * @param string $subject  (if called with 4 parameters) or full mail body (if called with 3 parameters)
+ * @param string $password (optional) - Password
+ * @param string $body (optional, but recommended) - mail body
  * @return bool - true on success, otherwise false
  * TODO: Replace this with something decent like PEAR::Mail or Zend_Mail.
  */
 function smtp_mail($to, $from, $data, $password = "", $body = "") {
     global $CONF;
+
     $smtpd_server = $CONF['smtp_server'];
     $smtpd_port = $CONF['smtp_port'];
-    //$smtp_server = $_SERVER["SERVER_NAME"];
+
     $smtp_server = php_uname('n');
     if (!empty($CONF['smtp_client'])) {
         $smtp_server = $CONF['smtp_client'];
@@ -1587,6 +1588,47 @@ $DEBUG_TEXT = <<<EOF
     </ul>
 EOF;
 
+
+/**
+ * @return string - PDO DSN for PHP.
+ * @throws Exception
+ */
+function db_connection_string() {
+    global $CONF;
+    $dsn = null;
+    if (db_mysql()) {
+        $socket = false;
+        if (Config::has('database_socket')) {
+            $socket = Config::read_string('database_socket');
+        }
+
+        $database_name = Config::read_string('database_name');
+
+        if ($socket) {
+            $dsn = "mysql:unix_socket={$socket};dbname={$database_name};charset=UTF8";
+        } else {
+            $dsn = "mysql:host={$CONF['database_host']};dbname={$database_name};charset=UTF8";
+        }
+    } elseif (db_sqlite()) {
+        $db = $CONF['database_name'];
+
+        $dsn = "sqlite:{$db}";
+    } elseif (db_pgsql()) {
+        $dsn = "pgsql:dbname={$CONF['database_name']}";
+        if (isset($CONF['database_host'])) {
+            $dsn .= ";host={$CONF['database_host']}";
+        }
+        if (isset($CONF['database_port'])) {
+            $dsn .= ";port={$CONF['database_port']}";
+        }
+        $dsn .= ";options='-c client_encoding=utf8'";
+    } else {
+        throw new Exception("<p style='color: red'>FATAL Error:<br />Invalid \$CONF['database_type'] <br/>'pgsql', 'mysql' or 'sqlite' supported. <br/> Please fix your config.inc.php!</p>");
+    }
+
+    return $dsn;
+}
+
 /**
  * db_connect
  * Action: Makes a connection to the database if it doesn't exist
@@ -1607,28 +1649,19 @@ function db_connect() {
 
     $link = false;
 
+    // throws.
+    $dsn = db_connection_string();
+
     $options = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_TIMEOUT => 5,
     );
     $username_password = true;
 
     $queries = array();
 
-    $dsn = null;
 
     if (db_mysql()) {
-        $socket = false;
-        if (Config::has('database_socket')) {
-            $socket = Config::read_string('database_socket');
-        }
-
-        $database_name = Config::read_string('database_name');
-
-        if ($socket) {
-            $dsn = "mysql:unix_socket={$socket};dbname={$database_name};charset=UTF8";
-        } else {
-            $dsn = "mysql:host={$CONF['database_host']};dbname={$database_name};charset=UTF8";
-        }
         if (Config::bool('database_use_ssl')) {
             $options[PDO::MYSQL_ATTR_SSL_KEY] = Config::read_string('database_ssl_key');
             $options[PDO::MYSQL_ATTR_SSL_CA] = Config::read_string('database_ssl_ca');
@@ -1650,31 +1683,23 @@ function db_connect() {
         $db = $CONF['database_name'];
 
         if (!file_exists($db)) {
-            $error_text = 'SQLite database missing: '. $db;
+            $error_text = 'SQLite database missing: ' . $db;
             throw new Exception($error_text);
         }
 
         if (!is_writeable($db)) {
-            $error_text = 'SQLite database not writeable: '. $db;
+            $error_text = 'SQLite database not writeable: ' . $db;
             throw new Exception($error_text);
         }
 
         if (!is_writeable(dirname($db))) {
-            $error_text = 'The directory the SQLite database is in is not writeable: '. dirname($db);
+            $error_text = 'The directory the SQLite database is in is not writeable: ' . dirname($db);
             throw new Exception($error_text);
         }
 
-        $dsn = "sqlite:{$db}";
         $username_password = false;
     } elseif (db_pgsql()) {
-        $dsn = "pgsql:dbname={$CONF['database_name']}";
-        if (isset($CONF['database_host'])) {
-            $dsn .= ";host={$CONF['database_host']}";
-        }
-        if (isset($CONF['database_port'])) {
-            $dsn .= ";port={$CONF['database_port']}";
-        }
-        $dsn .= ";options='-c client_encoding=utf8'";
+        // nothing to do.
     } else {
         throw new Exception("<p style='color: red'>FATAL Error:<br />Invalid \$CONF['database_type']! Please fix your config.inc.php!</p>");
     }

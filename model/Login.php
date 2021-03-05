@@ -36,7 +36,7 @@ class Login {
                 $crypt_password = pacrypt($password, $row['password']);
             } catch (\Exception $e) {
                 error_log("Error while trying to call pacrypt()");
-                error_log($e);
+                error_log("" . $e);
                 hash_equals("not", "comparable");
                 return false; // just refuse to login?
             }
@@ -49,7 +49,7 @@ class Login {
             $x = pacrypt('abc', 'def');
         } catch (\Exception $e) {
             error_log("Error trying to call pacrypt()");
-            error_log($e);
+            error_log("" . $e);
         }
 
         return hash_equals('not', 'comparable');
@@ -110,7 +110,7 @@ class Login {
             'password' => pacrypt($new_password),
         );
 
-        $result = db_update($this->key_table, 'username', $username, $set);
+        $result = db_update($this->table, 'username', $username, $set);
 
         if ($result != 1) {
             db_log($domain, 'edit_password', "FAILURE: " . $username);
