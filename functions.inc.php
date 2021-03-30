@@ -1623,7 +1623,7 @@ function db_connection_string() {
         }
         $dsn .= ";options='-c client_encoding=utf8'";
     } else {
-        throw new Exception("<p style='color: red'>FATAL Error:<br />Invalid \$CONF['database_type'] <br/>'pgsql', 'mysql' or 'sqlite' supported. <br/> Please fix your config.inc.php!</p>");
+        throw new Exception("<p style='color: red'>FATAL Error:<br />Invalid \$CONF['database_type'] <br/>Only: 'pgsql', 'mysql' or 'sqlite' supported. <br/> Please fix your config.inc.php!</p>");
     }
 
     return $dsn;
@@ -1850,7 +1850,7 @@ function db_execute($sql, array $values = [], $throw_exceptions = false) {
         $stmt = $link->prepare($sql);
         $stmt->execute($values);
     } catch (PDOException $e) {
-        $error_text = "Invalid query: " . $e->getMessage() .  " caused by " . $sql ;
+        $error_text = "Invalid query: " . $e->getMessage() .  " caused by " . $sql . ' ' . json_encode($values);
         error_log($error_text);
         if ($throw_exceptions) {
             throw $e;
@@ -2344,6 +2344,48 @@ function getRemoteAddr() {
     }
 
     return $REMOTE_ADDR;
+}
+
+
+/**
+ * @param array $server
+ * @return string URL to Postfixadmin - will always end in a '/'
+ */
+function getSiteUrl(array $server = []): string {
+    if (Config::has('site_url')) {
+        $url = Config::read_string('site_url');
+        if (!empty($url)) {
+            return $url;
+        }
+    }
+
+    if (empty($server)) {
+        $server = $_SERVER;
+    }
+
+    // ideally need to support installation unnder a random prefix
+    // - https://example.com/my-postfixadmin-3.1.2/index.php
+    // - https://example.com/my-postfixadmin-3.1.2/users/password-recover.php
+    // in either case, we want https://example.com/my-postfixadmin-3.1.2/
+
+    $uri = dirname($server['REQUEST_URI']);
+    if (preg_match('!/users/.*.php!', $uri)) {
+        $uri = dirname($uri);
+    }
+
+    // ensure it ends with a /
+    if (substr($uri, -1, 1) !== '/') {
+        $uri = $uri . '/';
+    }
+
+
+    $https = isset($server['HTTPS']) && $server['HTTPS'] == 'on' ? 'https' : 'http';
+
+    if (isset($server['REQUEST_SCHEME'])) {
+        $https = $server['REQUEST_SCHEME'];
+    }
+
+    return $https . '://' . $server['HTTP_HOST'] . $uri;
 }
 
 /* vim: set expandtab softtabstop=4 tabstop=4 shiftwidth=4: */

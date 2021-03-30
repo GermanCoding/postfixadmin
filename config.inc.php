@@ -176,7 +176,9 @@ $CONF['smtp_client'] = '';
 $CONF['smtp_sendmail_tls'] = 'NO';
 
 // Encrypt
-// In what way do you want the passwords to be crypted?
+// See: https://github.com/postfixadmin/postfixadmin/blob/master/DOCUMENTS/HASHING.md
+// In what way do you want the passwords to be stored in the database, needs to be compatabile with Postfix/MTAs etc.
+//
 // md5crypt = internal postfix admin md5
 // md5 = md5 sum of the password
 // system = whatever you have set as your PHP system default
@@ -196,7 +198,7 @@ $CONF['smtp_sendmail_tls'] = 'NO';
 //     - dovecot 2.0.0 - 2.0.7 is not supported
 // - php_crypt PREFIX: hash has specified prefix - example: php_crypt:SHA512::{SHA256-CRYPT}
 // sha512.b64 - {SHA512-CRYPT.B64} (base64 encoded sha512) (no dovecot dependency; should support migration from md5crypt)
-$CONF['encrypt'] = 'md5crypt';
+$CONF['encrypt'] = 'php_crypt';
 
 // In what flavor should courier-authlib style passwords be encrypted?
 // (only used if $CONF['encrypt'] == 'authlib')
@@ -711,10 +713,14 @@ $CONF['xmlrpc_enabled'] = false;
 
 //Account expiration info
 //If enabled, mailbox passwords have a password_expiry field set, which is updated each time the password is changed, based on the parent domain's password_expiry (days) value.
-//More details in README.password_expiration
+//More details in Password_Expiration.md
 $CONF['password_expiration'] = 'YES';
 
-$CONF['version'] = '3.3.8';
+// If defined, use this rather than trying to construct it from  $_SERVER parameters.
+// used in (at least) password-recover.php.
+$CONF['site_url'] = null;
+
+$CONF['version'] = '3.4-dev';
 
 // If you want to keep most settings at default values and/or want to ensure
 // that future updates work without problems, you can use a separate config 

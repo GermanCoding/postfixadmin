@@ -1,3 +1,7 @@
+<?php
+$PALANG = [];
+require_once('common.php');
+?>
 <html lang="">
 <head>
     <meta charset="utf-8">
@@ -56,9 +60,6 @@
  * File: setup.php
  * Used to help ensure a server is setup appropriately during installation/setup.
  */
-$PALANG = [];
-
-require_once(dirname(__FILE__) . '/common.php'); # make sure correct common.php is used.
 
 $configSetupPassword = Config::read_string('setup_password');
 
@@ -317,6 +318,7 @@ EOF;
                 if (!empty($check['error'])) {
                     echo '<h3 class="text-danger">Hosting Environment errors found. Login to see details.</h3>';
                 }
+
                 if (!empty($check['warn'])) {
                     echo '<h3 class="text-warning">Hosting Environment warnings found. Login to see details.</h3>';
                 }
@@ -600,6 +602,8 @@ function do_software_environment_check() {
         $info[] = "Webserver - " . apache_get_version();
     }
 
+
+    $info[] = "Postfixadmin public url detected as " . getSiteUrl($_SERVER) . " use \$CONF['site_url'] to override";
 
     $info[] = "Postfixadmin installed at - " . realpath(__DIR__);
 

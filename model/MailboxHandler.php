@@ -4,7 +4,8 @@
 /**
  * Simple class to represent a user.
  */
-class MailboxHandler extends PFAHandler {
+class MailboxHandler extends PFAHandler
+{
     protected $db_table = 'mailbox';
     protected $id_field = 'username';
     protected $domain_field = 'domain';
@@ -12,7 +13,7 @@ class MailboxHandler extends PFAHandler {
 
     # init $this->struct, $this->db_table and $this->id_field
     protected function initStruct() {
-        $passwordReset = (int) Config::bool('forgotten_user_password_reset') && !Config::read('mailbox_postpassword_script');
+        $passwordReset = (int) ( Config::bool('forgotten_user_password_reset') && !Config::read('mailbox_postpassword_script') );
         $reset_by_sms = 0;
         if ($passwordReset && Config::read_string('sms_send_function')) {
             $reset_by_sms = 1;
